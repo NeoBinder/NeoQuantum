@@ -1,0 +1,10 @@
+__pycache__
+*.pkl
+*.zip
+.idea
+*.egg-info
+*swap-window
+*_dev.yaml
+*dist
+
+

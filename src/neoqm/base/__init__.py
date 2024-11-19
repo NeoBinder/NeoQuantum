@@ -1,0 +1,1 @@
+from neoqm.base.wrapper import QMBaseWrapper

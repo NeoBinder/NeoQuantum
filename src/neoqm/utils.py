@@ -7,6 +7,7 @@ DATADIR = os.path.join(ROOTDIR, "data")
 import subprocess
 
 
+
 def run_command(command, stdout_file=None, stderr_file=None):
     if stdout_file is None:
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)

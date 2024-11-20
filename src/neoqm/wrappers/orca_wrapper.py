@@ -4,7 +4,7 @@ import time
 import copy
 import shutil
 import numpy as np
-
+from neoqm import unit
 from neoqm.utils import run_command, RuntimeTempDir
 from neoqm.base import QMBaseWrapper
 
@@ -112,7 +112,7 @@ class OrcaWrapper(QMBaseWrapper):
         return grad
     
 
-    def get_energy_and_gradient(self, geometry, point_charges=None):
+    def get_energy_and_gradient(self, geometry, point_charges=None,unit_in="atomic"):
         # point charge in [n,4]: q,x,y,z
         # template with {geometry} \n Q q x y z
         # geom should be xyz content string
@@ -129,7 +129,12 @@ class OrcaWrapper(QMBaseWrapper):
                                        '{}.out'.format(self.orca_job_name))
             grad_path = os.path.join(tmpdir.name,
                                      '{}.engrad'.format(self.orca_job_name))
-            result['energy'] = self.parse_energy(energy_path)
-            result['gradient'] = self.parse_gradient(
+            energy = self.parse_energy(energy_path)
+            gradient = self.parse_gradient(
                 grad_path, atom_nums=len(geometry.strip('\n').split('\n')))
-        return result
+        energy = energy * unit.hartree * unit.avogadro_constant
+        gradient = gradient * unit.hartree * unit.avogadro_constant / unit.bohr
+        if unit_in in {"openmm","ttk"}:
+            energy = energy.to(unit.kilojoule / unit.mole)
+            gradient = gradient.to(unit.kilojoule / unit.mole / unit.nanometer)
+        return energy ,gradient

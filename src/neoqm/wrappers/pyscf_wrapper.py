@@ -46,7 +46,7 @@ class PyscfWrapper(QMBaseWrapper):
         self.mol.build()
         self.scanner = scf.RHF(self.mol).apply(grad.RHF).as_scanner()
 
-    def get_energy_and_gradient(self, geometry):
+    def get_energy_and_gradient(self, geometry,unit_in="atomic"):
         """
         Calculate the energy and gradient of the molecule at the given geometry.
 
@@ -56,10 +56,10 @@ class PyscfWrapper(QMBaseWrapper):
         Returns:
         dict: A dictionary containing the energy and gradients.
         """
-        energy, current_grad = self.scanner(geometry)        
+        energy, gradient = self.scanner(geometry)        
         energy = energy * unit.hartree * unit.avogadro_constant
-        current_grad = current_grad * unit.hartree * unit.avogadro_constant / unit.bohr
-        return {
-            "energy": energy,
-            "gradients": current_grad,
-        }
+        gradient = gradient * unit.hartree * unit.avogadro_constant / unit.bohr
+        if unit_in in {"openmm","ttk"}:
+            energy = energy.to(unit.kilojoule / unit.mole)
+            gradient = gradient.to(unit.kilojoule / unit.mole / unit.nanometer)
+        return energy , gradient
